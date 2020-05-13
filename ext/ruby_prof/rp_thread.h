@@ -22,17 +22,19 @@ typedef struct thread_data_t
     st_table* method_table;           /* Methods called in the thread */
 } thread_data_t;
 
+struct prof_profile_t;
+
 void rp_init_thread(void);
 st_table* threads_table_create(void);
-thread_data_t* threads_table_lookup(void* profile, VALUE fiber);
-thread_data_t* threads_table_insert(void* profile, VALUE fiber);
+thread_data_t* threads_table_lookup(struct prof_profile_t* profile, VALUE fiber);
+thread_data_t* threads_table_insert(struct prof_profile_t* profile, VALUE fiber);
 void threads_table_free(st_table* table);
 
 thread_data_t* prof_get_thread(VALUE self);
 VALUE prof_thread_wrap(thread_data_t* thread);
 void prof_thread_mark(void* data);
 
-void switch_thread(void* profile, thread_data_t* thread_data, double measurement);
+void switch_thread(struct prof_profile_t* profile, thread_data_t* thread_data, double measurement);
 int pause_thread(st_data_t key, st_data_t value, st_data_t data);
 int unpause_thread(st_data_t key, st_data_t value, st_data_t data);
 

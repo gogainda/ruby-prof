@@ -165,7 +165,7 @@ void threads_table_free(st_table* table)
     rb_st_free_table(table);
 }
 
-thread_data_t* threads_table_lookup(void* prof, VALUE fiber)
+thread_data_t* threads_table_lookup(prof_profile_t* prof, VALUE fiber)
 {
     prof_profile_t* profile = prof;
     thread_data_t* result = NULL;
@@ -179,7 +179,7 @@ thread_data_t* threads_table_lookup(void* prof, VALUE fiber)
     return result;
 }
 
-thread_data_t* threads_table_insert(void* prof, VALUE fiber)
+thread_data_t* threads_table_insert(prof_profile_t* prof, VALUE fiber)
 {
     prof_profile_t* profile = prof;
     thread_data_t* result = thread_data_create();
@@ -208,7 +208,7 @@ thread_data_t* threads_table_insert(void* prof, VALUE fiber)
 }
 
 // ======   Profiling Methods  ======
-void switch_thread(void* prof, thread_data_t* thread_data, double measurement)
+void switch_thread(prof_profile_t* prof, thread_data_t* thread_data, double measurement)
 {
     prof_profile_t* profile = prof;
 
