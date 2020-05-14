@@ -45,12 +45,34 @@ prof_call_tree_t* prof_call_tree_copy(prof_call_tree_t* other)
     return result;
 }
 
+static int prof_call_tree_merge_children(st_data_t key, st_data_t other_child_data, st_data_t self_data)
+{
+    prof_call_tree_t* other_child = (prof_call_tree_t*)other_child_data;
+
+    prof_call_tree_t* parent = (prof_call_tree_t*)self_data;
+    prof_call_tree_t* child = call_tree_table_lookup(parent->children, other_child->method->key);
+
+    char* a = rb_id2name(SYM2ID(parent->method->method_name));
+    char* b = rb_id2name(SYM2ID(child->method->method_name));
+
+    if (child)
+    {
+        prof_call_tree_merge(child, other_child);
+    }
+    else
+    {
+        prof_call_tree_remove_child(other_child->parent, other_child);
+        prof_call_tree_add_child(parent, other_child);
+    }
+
+    return ST_CONTINUE;
+}
+
 void prof_call_tree_merge(prof_call_tree_t* result, prof_call_tree_t* other)
 {
-    result->measurement->called += other->measurement->called;
-    result->measurement->total_time += other->measurement->total_time;
-    result->measurement->self_time += other->measurement->self_time;
-    result->measurement->wait_time += other->measurement->wait_time;
+    prof_measurement_combine(result->measurement, other->measurement);
+    prof_measurement_combine(result->method->measurement, other->method->measurement);
+    rb_st_foreach(other->children, prof_call_tree_merge_children, (st_data_t)result);
 }
 
 static int prof_call_tree_collect_children(st_data_t key, st_data_t value, st_data_t result)
@@ -209,12 +231,19 @@ uint32_t prof_call_figure_depth(prof_call_tree_t* call_tree_data)
 void prof_call_tree_add_parent(prof_call_tree_t* self, prof_call_tree_t* parent)
 {
     prof_call_tree_add_child(parent, self);
-    self->parent = parent;
 }
 
 void prof_call_tree_add_child(prof_call_tree_t* self, prof_call_tree_t* child)
 {
     call_tree_table_insert(self->children, child->method->key, child);
+    child->parent = self;
+}
+
+void prof_call_tree_remove_child(prof_call_tree_t* self, prof_call_tree_t* child)
+{
+    st_data_t result = 0;
+    rb_st_delete(self->children, &child->method->key, &result);
+    child->parent = NULL;
 }
 
 /* =======  RubyProf::CallTree   ========*/

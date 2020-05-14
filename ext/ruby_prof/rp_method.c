@@ -159,6 +159,7 @@ prof_method_t* prof_method_create(VALUE profile, VALUE klass, VALUE msym, VALUE 
     result->klass = resolve_klass(klass, &result->klass_flags);
     result->klass_name = Qnil;
     result->method_name = msym;
+
     result->measurement = prof_measurement_create();
 
     result->call_trees = prof_call_trees_create();

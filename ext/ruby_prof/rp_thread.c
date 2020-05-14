@@ -281,7 +281,7 @@ static VALUE prof_thread_id(VALUE self)
    fiber_id -> number
 
 Returns the fiber id of this thread. */
-static VALUE prof_fiber_id(VALUE self)
+static VALUE prof_thread_fiber_id(VALUE self)
 {
     thread_data_t* thread = prof_get_thread(self);
     return thread->fiber_id;
@@ -291,9 +291,11 @@ static VALUE prof_fiber_id(VALUE self)
    call_tree -> CallTree
 
 Returns the root of the call tree. */
-static VALUE prof_call_tree(VALUE self)
+static VALUE prof_thread_call_tree(VALUE self)
 {
     thread_data_t* thread = prof_get_thread(self);
+    char* a = rb_id2name(SYM2ID(thread->call_tree->method->method_name));
+
     return prof_call_tree_wrap(thread->call_tree);
 }
 
@@ -313,6 +315,15 @@ static VALUE prof_thread_methods(VALUE self)
     return thread->methods;
 }
 
+static VALUE prof_thread_merge(VALUE self, VALUE other)
+{
+    thread_data_t* thread1 = prof_get_thread(self);
+    thread_data_t* thread2 = prof_get_thread(other);
+    prof_call_tree_merge(thread1->call_tree, thread2->call_tree);
+
+    return self;
+}
+
 /* :nodoc: */
 static VALUE prof_thread_dump(VALUE self)
 {
@@ -321,7 +332,7 @@ static VALUE prof_thread_dump(VALUE self)
     VALUE result = rb_hash_new();
     rb_hash_aset(result, ID2SYM(rb_intern("fiber_id")), thread_data->fiber_id);
     rb_hash_aset(result, ID2SYM(rb_intern("methods")), prof_thread_methods(self));
-    rb_hash_aset(result, ID2SYM(rb_intern("call_tree")), prof_call_tree(self));
+    rb_hash_aset(result, ID2SYM(rb_intern("call_tree")), prof_thread_call_tree(self));
 
     return result;
 }
@@ -354,9 +365,10 @@ void rp_init_thread(void)
     rb_define_alloc_func(cRpThread, prof_thread_allocate);
 
     rb_define_method(cRpThread, "id", prof_thread_id, 0);
-    rb_define_method(cRpThread, "call_tree", prof_call_tree, 0);
-    rb_define_method(cRpThread, "fiber_id", prof_fiber_id, 0);
+    rb_define_method(cRpThread, "call_tree", prof_thread_call_tree, 0);
+    rb_define_method(cRpThread, "fiber_id", prof_thread_fiber_id, 0);
     rb_define_method(cRpThread, "methods", prof_thread_methods, 0);
+    rb_define_method(cRpThread, "merge!", prof_thread_merge, 1);
     rb_define_method(cRpThread, "_dump_data", prof_thread_dump, 0);
     rb_define_method(cRpThread, "_load_data", prof_thread_load, 1);
 }

@@ -29,5 +29,18 @@ module RubyProf
     def exclude_singleton_methods!(mod, *method_or_methods)
       exclude_methods!(mod.singleton_class, *method_or_methods)
     end
+
+    def merge_threads
+      grouped = self.threads.group_by do |thread|
+        thread.call_tree.target
+      end
+
+      grouped.each do |key, threads|
+        threads[1..].reduce(threads.first) do |result, thread|
+          result.merge!(thread)
+          self.remove_thread(thread)
+        end
+      end
+    end
   end
 end

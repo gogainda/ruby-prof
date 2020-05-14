@@ -506,10 +506,22 @@ static int pop_frames(VALUE key, st_data_t value, st_data_t data)
     return ST_CONTINUE;
 }
 
-static void
-prof_stop_threads(prof_profile_t* profile)
+static void prof_stop_threads(prof_profile_t* profile)
 {
     rb_st_foreach(profile->threads_tbl, pop_frames, (st_data_t)profile);
+}
+
+static int merge_threads(st_data_t key, st_data_t value, st_data_t self)
+{
+    prof_profile_t* profile = prof_get_profile(self);
+
+  /*  thread_data_t* thread_data = (thread_data_t*)value;
+    if (thread_data->trace)
+    {
+        VALUE threads_array = (VALUE)result;
+        rb_ary_push(threads_array, prof_thread_wrap(thread_data));
+    }*/
+    return ST_CONTINUE;
 }
 
 /* call-seq:
@@ -859,6 +871,16 @@ static VALUE prof_exclude_method(VALUE self, VALUE klass, VALUE msym)
     return self;
 }
 
+static VALUE prof_remove_thread(VALUE self, VALUE thread)
+{
+    prof_profile_t* profile = prof_get_profile(self);
+    thread_data_t* thread_data = prof_get_thread(thread);
+
+    st_data_t data = 0;
+    int result = st_delete(profile->threads_tbl, &thread_data->fiber, &data);
+    return Qnil;
+}
+
 /* :nodoc: */
 VALUE prof_profile_dump(VALUE self)
 {
@@ -897,6 +919,7 @@ void rp_init_profile(void)
     rb_define_method(cProfile, "running?", prof_running, 0);
     rb_define_method(cProfile, "paused?", prof_paused, 0);
     rb_define_method(cProfile, "threads", prof_threads, 0);
+    rb_define_method(cProfile, "remove_thread", prof_remove_thread, 1);
     rb_define_method(cProfile, "exclude_method!", prof_exclude_method, 2);
     rb_define_method(cProfile, "profile", prof_profile_object, 0);
 
