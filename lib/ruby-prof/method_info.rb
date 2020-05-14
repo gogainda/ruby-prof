@@ -17,7 +17,7 @@ module RubyProf
                              when 0x2
                                "<Class::#{klass_name}>"
                              when 0x4
-                               "<Module::#{klass_name}>"
+                                "<Module::#{klass_name}>"
                              when 0x8
                                "<Object::#{klass_name}>"
                              else
@@ -25,6 +25,15 @@ module RubyProf
                              end
 
       "#{decorated_class_name}##{method_name}"
+    end
+
+    def ==(other)
+      self.full_name == other.full_name
+    end
+    alias :eql? :==
+
+    def hash
+      self.full_name.hash
     end
 
     # The number of times this method was called
