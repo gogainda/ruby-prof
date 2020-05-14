@@ -130,6 +130,14 @@ prof_measurement_t* prof_get_measurement(VALUE self)
     return result;
 }
 
+void prof_measurement_combine(prof_measurement_t* result, prof_measurement_t* other)
+{
+    result->called += other->called;
+    result->total_time += other->total_time;
+    result->self_time += other->self_time;
+    result->wait_time += other->wait_time;
+}
+
 /* call-seq:
    total_time -> float
 

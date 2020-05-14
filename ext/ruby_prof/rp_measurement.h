@@ -45,6 +45,8 @@ VALUE prof_measurement_wrap(prof_measurement_t* measurement);
 prof_measurement_t* prof_get_measurement(VALUE self);
 void prof_measurement_mark(void* data);
 
+void prof_measurement_combine(prof_measurement_t* result, prof_measurement_t* other);
+
 void rp_init_measure(void);
 
 #endif //__rp_measurementMENT_H__
