@@ -1,3 +1,16 @@
+1.4.3 (2021-02-15)
+=====================
+* Remove trailing spaces (sergioro)
+* Enable loading ruby_prof.so from ext directory for development purposes (sergioro)
+* Create temp directory for test output (sergioro)
+* Fix minitest warning about using MT_CPU instead of N (sergioro)
+* Fix minitest warning "Use assert_nil if expecting nil"  (sergioro)
+* Fix file permissions (sergioro)
+* Fix failing test by forcing GC to run (Charlie Savage)
+* Switch to GitHub actions (Charlie Savage)
+* Switch to C11 (Charlie Savage)
+* Greatly slim down library size by removing symbols on GCC (Charlie Savage)
+
 1.4.2 (2020-11-3)
 =====================
 * Do NOT use Ruby 2.7.0 and 2.7.1 with ruby-prof. A bug in those versions of ruby causes ruby-prof to
